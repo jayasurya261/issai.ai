@@ -28,18 +28,7 @@ const Navbar = () => {
                         </span>
                     </Link>
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center space-x-8">
-                        <Link to="/" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
-                            Features
-                        </Link>
-                        <Link to="/" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
-                            How it works
-                        </Link>
-                        <Link to="/" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">
-                            Pricing
-                        </Link>
-                    </div>
+
 
                     {/* CTA Button / Auth State */}
                     <div className="flex items-center space-x-4">
