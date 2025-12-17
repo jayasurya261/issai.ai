@@ -45,6 +45,38 @@ router.post('/', async (req, res) => {
     }
 });
 
+// DELETE /api/expenses/:id - Delete an expense
+router.delete('/:id', async (req, res) => {
+    try {
+        const deletedExpense = await Expense.findByIdAndDelete(req.params.id);
+        if (!deletedExpense) {
+            return res.status(404).json({ message: 'Expense not found' });
+        }
+        res.json({ message: 'Expense deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// PUT /api/expenses/:id - Update an expense
+router.put('/:id', async (req, res) => {
+    try {
+        const { title, amount, date, description, category } = req.body;
+        const updatedExpense = await Expense.findByIdAndUpdate(
+            req.params.id,
+            { title, amount, date, description, category },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedExpense) {
+            return res.status(404).json({ message: 'Expense not found' });
+        }
+        res.json(updatedExpense);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // POST /api/expenses/upload - CSV Upload
 router.post('/upload', upload.single('file'), (req, res) => {
     if (!req.file) {

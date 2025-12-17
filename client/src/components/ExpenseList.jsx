@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ExpenseList = ({ expenses }) => {
+const ExpenseList = ({ expenses, onEdit, onDelete }) => {
     return (
         <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
             <h3 className="text-xl font-semibold mb-4">Recent Expenses</h3>
@@ -12,12 +12,13 @@ const ExpenseList = ({ expenses }) => {
                         <th className="py-2 px-4">Category</th>
                         <th className="py-2 px-4">Amount</th>
                         <th className="py-2 px-4">Description</th>
+                        <th className="py-2 px-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {expenses.length === 0 ? (
                         <tr>
-                            <td colSpan="5" className="py-4 text-center text-gray-500">No expenses found.</td>
+                            <td colSpan="6" className="py-4 text-center text-gray-500">No expenses found.</td>
                         </tr>
                     ) : (
                         expenses.map((expense) => (
@@ -31,6 +32,10 @@ const ExpenseList = ({ expenses }) => {
                                 </td>
                                 <td className="py-2 px-4 text-red-600 font-semibold">${expense.amount.toFixed(2)}</td>
                                 <td className="py-2 px-4 text-gray-500 text-sm">{expense.description}</td>
+                                <td className="py-2 px-4 flex gap-2">
+                                    <button onClick={() => onEdit(expense)} className="text-blue-600 hover:text-blue-800 font-medium">Edit</button>
+                                    <button onClick={() => onDelete(expense._id)} className="text-red-600 hover:text-red-800 font-medium">Delete</button>
+                                </td>
                             </tr>
                         ))
                     )}

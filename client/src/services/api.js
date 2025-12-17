@@ -13,9 +13,15 @@ export const uploadExpenses = (formData) => api.post('/expenses/upload', formDat
     },
 });
 export const analyzeAllExpenses = () => api.post('/expenses/analyze-all');
+export const deleteExpense = (id) => api.delete(`/expenses/${id}`);
+export const updateExpense = (id, expense) => api.put(`/expenses/${id}`, expense);
 export const getStats = () => api.get('/expenses/stats');
 export const exportCsv = () => {
     window.open('http://localhost:5000/api/expenses/export/csv', '_blank');
+};
+
+export const logout = () => {
+    window.location.href = 'http://localhost:5000/api/logout';
 };
 
 export default api;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getExpenses, getStats, exportCsv, analyzeAllExpenses } from '../services/api';
+import { getExpenses, getStats, exportCsv, analyzeAllExpenses, logout, deleteExpense } from '../services/api';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
@@ -14,6 +14,8 @@ const Dashboard = () => {
     const [expenses, setExpenses] = useState([]);
     const [stats, setStats] = useState([]);
 
+    const [editingExpense, setEditingExpense] = useState(null);
+
     const fetchData = async () => {
         try {
             const expensesRes = await getExpenses();
@@ -24,15 +26,6 @@ const Dashboard = () => {
             console.error("Error fetching data", error);
         }
     };
-
-    useEffect(() => {
-        if (user) {
-            fetchData();
-        }
-    }, [user]);
-
-    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-    if (!user) return <Navigate to="/" replace />;
 
     // Prepare Chart Data
     const chartData = {
@@ -56,6 +49,24 @@ const Dashboard = () => {
         ],
     };
 
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this expense?")) {
+            try {
+                await deleteExpense(id);
+                fetchData(); // Refresh list
+            } catch (error) {
+                console.error("Error deleting expense", error);
+                alert("Failed to delete expense");
+            }
+        }
+    };
+
+    const handleEdit = (expense) => {
+        setEditingExpense(expense);
+        // Ideally scroll to form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const handleAnalyze = async () => {
         try {
             await analyzeAllExpenses();
@@ -67,6 +78,8 @@ const Dashboard = () => {
         }
     };
 
+    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (!user) return <Navigate to="/" replace />;
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-8">
@@ -78,12 +91,22 @@ const Dashboard = () => {
                     <button onClick={exportCsv} className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
                         Export CSV
                     </button>
+                    <button onClick={logout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                        Logout
+                    </button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <div className="lg:col-span-2">
-                    <ExpenseForm onExpenseAdded={fetchData} />
+                    <ExpenseForm
+                        onExpenseAdded={() => {
+                            fetchData();
+                            setEditingExpense(null);
+                        }}
+                        editingExpense={editingExpense}
+                        onCancelEdit={() => setEditingExpense(null)}
+                    />
                 </div>
                 <div className="bg-white p-6 rounded-lg shadow-md">
                     <h3 className="text-xl font-semibold mb-4 text-center">Category Breakdown</h3>
@@ -97,7 +120,7 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <ExpenseList expenses={expenses} />
+            <ExpenseList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
         </div>
     );
 };

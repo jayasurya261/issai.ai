@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
-import { addExpense, uploadExpenses } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { addExpense, uploadExpenses, updateExpense } from '../services/api';
 
-const ExpenseForm = ({ onExpenseAdded }) => {
+const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }) => {
     const [formData, setFormData] = useState({
         title: '',
         amount: '',
         date: new Date().toISOString().split('T')[0],
         description: '',
+        category: ''
     });
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('manual');
+
+    useEffect(() => {
+        if (editingExpense) {
+            setFormData({
+                title: editingExpense.title,
+                amount: editingExpense.amount,
+                date: new Date(editingExpense.date).toISOString().split('T')[0],
+                description: editingExpense.description || '',
+                category: editingExpense.category || ''
+            });
+            setActiveTab('manual');
+        } else {
+            setFormData({
+                title: '',
+                amount: '',
+                date: new Date().toISOString().split('T')[0],
+                description: '',
+                category: ''
+            });
+        }
+    }, [editingExpense]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,17 +42,24 @@ const ExpenseForm = ({ onExpenseAdded }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await addExpense(formData);
+            if (editingExpense) {
+                await updateExpense(editingExpense._id, formData);
+                alert('Expense updated successfully!');
+            } else {
+                await addExpense(formData);
+                alert('Expense added successfully!');
+            }
+
             setFormData({
                 title: '',
                 amount: '',
                 date: new Date().toISOString().split('T')[0],
-                description: ''
+                description: '',
+                category: ''
             }); // Reset form
             onExpenseAdded();
-            alert('Expense added successfully!');
         } catch (error) {
-            alert('Error adding expense');
+            alert('Error saving expense');
             console.error(error);
         } finally {
             setLoading(false);
@@ -65,16 +94,18 @@ const ExpenseForm = ({ onExpenseAdded }) => {
             <div className="flex border-b mb-4">
                 <button
                     className={`mr-4 pb-2 ${activeTab === 'manual' ? 'border-b-2 border-blue-500 font-semibold' : 'text-gray-500'}`}
-                    onClick={() => setActiveTab('manual')}
+                    onClick={() => { setActiveTab('manual'); onCancelEdit(); }}
                 >
-                    Manual Entry
+                    {editingExpense ? 'Edit Expense' : 'Manual Entry'}
                 </button>
-                <button
-                    className={`pb-2 ${activeTab === 'csv' ? 'border-b-2 border-blue-500 font-semibold' : 'text-gray-500'}`}
-                    onClick={() => setActiveTab('csv')}
-                >
-                    CSV Upload
-                </button>
+                {!editingExpense && (
+                    <button
+                        className={`pb-2 ${activeTab === 'csv' ? 'border-b-2 border-blue-500 font-semibold' : 'text-gray-500'}`}
+                        onClick={() => setActiveTab('csv')}
+                    >
+                        CSV Upload
+                    </button>
+                )}
             </div>
 
             {activeTab === 'manual' ? (
@@ -84,10 +115,20 @@ const ExpenseForm = ({ onExpenseAdded }) => {
                         <input type="number" name="amount" placeholder="Amount" value={formData.amount} onChange={handleChange} required className="border p-2 rounded w-full" />
                         <input type="date" name="date" value={formData.date} onChange={handleChange} required className="border p-2 rounded w-full" />
                         <input type="text" name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="border p-2 rounded w-full" />
+                        {editingExpense && (
+                            <input type="text" name="category" placeholder="Category (Optional Override)" value={formData.category} onChange={handleChange} className="border p-2 rounded w-full" />
+                        )}
                     </div>
-                    <button type="submit" disabled={loading} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50">
-                        {loading ? 'Adding...' : 'Add Expense'}
-                    </button>
+                    <div className="flex gap-2">
+                        <button type="submit" disabled={loading} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50">
+                            {loading ? 'Saving...' : (editingExpense ? 'Update Expense' : 'Add Expense')}
+                        </button>
+                        {editingExpense && (
+                            <button type="button" onClick={onCancelEdit} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                                Cancel
+                            </button>
+                        )}
+                    </div>
                 </form>
             ) : (
                 <form onSubmit={handleFileUpload} className="space-y-4">
