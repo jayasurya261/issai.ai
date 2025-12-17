@@ -135,12 +135,12 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }) => {
             {activeTab === 'manual' ? (
                 <form onSubmit={handleManualSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" name="title" placeholder="Title" value={formData.title} onChange={handleChange} required className="border p-2 rounded w-full" />
-                        <input type="number" name="amount" placeholder="Amount" value={formData.amount} onChange={handleChange} required className="border p-2 rounded w-full" />
-                        <input type="date" name="date" value={formData.date} onChange={handleChange} required className="border p-2 rounded w-full" />
-                        <input type="text" name="description" placeholder="Description" value={formData.description} onChange={handleChange} className="border p-2 rounded w-full" />
+                        <input type="text" name="title" placeholder="Title" value={formData.title || ''} onChange={handleChange} required className="border p-2 rounded w-full" />
+                        <input type="number" name="amount" placeholder="Amount" value={formData.amount || ''} onChange={handleChange} required className="border p-2 rounded w-full" />
+                        <input type="date" name="date" value={formData.date || ''} onChange={handleChange} required className="border p-2 rounded w-full" />
+                        <input type="text" name="description" placeholder="Description" value={formData.description || ''} onChange={handleChange} className="border p-2 rounded w-full" />
                         {editingExpense && (
-                            <input type="text" name="category" placeholder="Category (Optional Override)" value={formData.category} onChange={handleChange} className="border p-2 rounded w-full" />
+                            <input type="text" name="category" placeholder="Category (Optional Override)" value={formData.category || ''} onChange={handleChange} className="border p-2 rounded w-full" />
                         )}
                     </div>
                     <div className="flex gap-2">

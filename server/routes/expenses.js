@@ -7,14 +7,19 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
 
+const requireLogin = require('../middleware/requireLogin');
+
 const streamifier = require('streamifier');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Apply auth middleware to all routes
+router.use(requireLogin);
+
 // GET /api/expenses - List all expenses
 router.get('/', async (req, res) => {
     try {
-        const expenses = await Expense.find().sort({ date: -1 });
+        const expenses = await Expense.find({ user: req.user._id }).sort({ date: -1 });
         res.json(expenses);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -38,6 +43,7 @@ router.post('/', async (req, res) => {
             description,
             category: finalCategory,
             isManual: true,
+            user: req.user._id
         });
 
         const savedExpense = await newExpense.save();
@@ -50,9 +56,9 @@ router.post('/', async (req, res) => {
 // DELETE /api/expenses/:id - Delete an expense
 router.delete('/:id', async (req, res) => {
     try {
-        const deletedExpense = await Expense.findByIdAndDelete(req.params.id);
+        const deletedExpense = await Expense.findOneAndDelete({ _id: req.params.id, user: req.user._id });
         if (!deletedExpense) {
-            return res.status(404).json({ message: 'Expense not found' });
+            return res.status(404).json({ message: 'Expense not found or unauthorized' });
         }
         res.json({ message: 'Expense deleted successfully' });
     } catch (error) {
@@ -64,14 +70,14 @@ router.delete('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { title, amount, date, description, category } = req.body;
-        const updatedExpense = await Expense.findByIdAndUpdate(
-            req.params.id,
+        const updatedExpense = await Expense.findOneAndUpdate(
+            { _id: req.params.id, user: req.user._id },
             { title, amount, date, description, category },
             { new: true } // Return the updated document
         );
 
         if (!updatedExpense) {
-            return res.status(404).json({ message: 'Expense not found' });
+            return res.status(404).json({ message: 'Expense not found or unauthorized' });
         }
         res.json(updatedExpense);
     } catch (error) {
@@ -100,7 +106,8 @@ router.post('/batch', async (req, res) => {
                     date: new Date(date),
                     description: description || '',
                     category,
-                    isManual: false
+                    isManual: false,
+                    user: req.user._id
                 });
             }
         }
@@ -115,7 +122,7 @@ router.post('/batch', async (req, res) => {
 // GET /api/expenses/export/csv
 router.get('/export/csv', async (req, res) => {
     try {
-        const expenses = await Expense.find().sort({ date: -1 });
+        const expenses = await Expense.find({ user: req.user._id }).sort({ date: -1 });
         const fields = ['title', 'amount', 'category', 'date', 'description'];
         const csvContent = [
             fields.join(','),
@@ -142,6 +149,7 @@ router.get('/export/csv', async (req, res) => {
 router.get('/stats', async (req, res) => {
     try {
         const stats = await Expense.aggregate([
+            { $match: { user: req.user._id } },
             {
                 $group: {
                     _id: "$category",
@@ -158,7 +166,7 @@ router.get('/stats', async (req, res) => {
 // POST /api/expenses/analyze-all - Re-categorize all uncategorized expenses
 router.post('/analyze-all', async (req, res) => {
     try {
-        const expenses = await Expense.find({}); // Find all to potential fix bad categories too if needed, or just { category: 'Uncategorized' }
+        const expenses = await Expense.find({ user: req.user._id }); // Find all to potential fix bad categories too if needed, or just { category: 'Uncategorized' }
         let count = 0;
 
         for (const expense of expenses) {
