@@ -10,7 +10,7 @@ export const UserProvider = ({ children }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/current_user', { withCredentials: true });
+                const res = await axios.get('https://issai-ai.vercel.app/api/current_user', { withCredentials: true });
                 setUser(res.data);
             } catch (error) {
                 console.error('Error fetching user:', error);

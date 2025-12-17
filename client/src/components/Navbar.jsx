@@ -7,11 +7,11 @@ const Navbar = () => {
     const { user, loading } = useUser();
 
     const handleLogin = () => {
-        window.location.href = 'http://localhost:5000/auth/google';
+        window.location.href = 'https://issai-ai.vercel.app/auth/google';
     };
 
     const handleLogout = () => {
-        window.location.href = 'http://localhost:5000/api/logout';
+        window.location.href = 'https://issai-ai.vercel.app/api/logout';
     };
 
     return (

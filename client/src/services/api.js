@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: 'https://issai-ai.vercel.app/api',
     withCredentials: true
 });
 
@@ -14,11 +14,11 @@ export const deleteExpense = (id) => api.delete(`/expenses/${id}`);
 export const updateExpense = (id, expense) => api.put(`/expenses/${id}`, expense);
 export const getStats = () => api.get('/expenses/stats');
 export const exportCsv = () => {
-    window.open('http://localhost:5000/api/expenses/export/csv', '_blank');
+    window.open('https://issai-ai.vercel.app/api/expenses/export/csv', '_blank');
 };
 
 export const logout = () => {
-    window.location.href = 'http://localhost:5000/api/logout';
+    window.location.href = 'https://issai-ai.vercel.app/api/logout';
 };
 
 export default api;
