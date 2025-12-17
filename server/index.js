@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:5173', // Allow frontend
+    origin: 'https://isaiiai.vercel.app', // Allow production frontend
     credentials: true
 }));
 app.use(express.json());
@@ -48,7 +48,7 @@ app.get(
     '/auth/google/callback',
     passport.authenticate('google'),
     (req, res) => {
-        res.redirect('http://localhost:5173/dashboard');
+        res.redirect('https://isaiiai.vercel.app/dashboard');
     }
 );
 
