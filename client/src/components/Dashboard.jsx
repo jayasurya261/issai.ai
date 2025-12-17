@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { getExpenses, getStats, exportCsv, analyzeAllExpenses, logout, deleteExpense } from '../services/api';
+import { getExpenses, getStats, exportCsv, analyzeAllExpenses, deleteExpense } from '../services/api';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
-import { useUser } from '../context/UserContext';
-import { Navigate } from 'react-router-dom';
+import { useUser, useAuth } from "@clerk/clerk-react";
+import { Navigate } from "react-router-dom";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const Dashboard = () => {
-    const { user, loading } = useUser();
+    const { user, isLoaded } = useUser();
+    const { getToken } = useAuth();
     const [expenses, setExpenses] = useState([]);
     const [stats, setStats] = useState([]);
 
@@ -85,8 +86,7 @@ const Dashboard = () => {
         }
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-    if (!user) return <Navigate to="/" replace />;
+    if (!isLoaded) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex justify-between items-center mb-8">
@@ -97,9 +97,6 @@ const Dashboard = () => {
                     </button>
                     <button onClick={exportCsv} className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
                         Export CSV
-                    </button>
-                    <button onClick={logout} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                        Logout
                     </button>
                 </div>
             </div>

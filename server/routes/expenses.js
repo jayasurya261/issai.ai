@@ -7,19 +7,19 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
 
-const requireLogin = require('../middleware/requireLogin');
+const clerkAuth = require('../middleware/clerkAuth');
 
 const streamifier = require('streamifier');
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Apply auth middleware to all routes
-router.use(requireLogin);
+router.use(clerkAuth);
 
 // GET /api/expenses - List all expenses
 router.get('/', async (req, res) => {
     try {
-        const expenses = await Expense.find({ user: req.user._id }).sort({ date: -1 });
+        const expenses = await Expense.find({ user: req.auth.userId }).sort({ date: -1 });
         res.json(expenses);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -43,7 +43,7 @@ router.post('/', async (req, res) => {
             description,
             category: finalCategory,
             isManual: true,
-            user: req.user._id
+            user: req.auth.userId
         });
 
         const savedExpense = await newExpense.save();
@@ -56,7 +56,7 @@ router.post('/', async (req, res) => {
 // DELETE /api/expenses/:id - Delete an expense
 router.delete('/:id', async (req, res) => {
     try {
-        const deletedExpense = await Expense.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+        const deletedExpense = await Expense.findOneAndDelete({ _id: req.params.id, user: req.auth.userId });
         if (!deletedExpense) {
             return res.status(404).json({ message: 'Expense not found or unauthorized' });
         }
@@ -71,7 +71,7 @@ router.put('/:id', async (req, res) => {
     try {
         const { title, amount, date, description, category } = req.body;
         const updatedExpense = await Expense.findOneAndUpdate(
-            { _id: req.params.id, user: req.user._id },
+            { _id: req.params.id, user: req.auth.userId },
             { title, amount, date, description, category },
             { new: true } // Return the updated document
         );
@@ -107,7 +107,7 @@ router.post('/batch', async (req, res) => {
                     description: description || '',
                     category,
                     isManual: false,
-                    user: req.user._id
+                    user: req.auth.userId
                 });
             }
         }
@@ -122,7 +122,7 @@ router.post('/batch', async (req, res) => {
 // GET /api/expenses/export/csv
 router.get('/export/csv', async (req, res) => {
     try {
-        const expenses = await Expense.find({ user: req.user._id }).sort({ date: -1 });
+        const expenses = await Expense.find({ user: req.auth.userId }).sort({ date: -1 });
         const fields = ['title', 'amount', 'category', 'date', 'description'];
         const csvContent = [
             fields.join(','),
@@ -149,7 +149,7 @@ router.get('/export/csv', async (req, res) => {
 router.get('/stats', async (req, res) => {
     try {
         const stats = await Expense.aggregate([
-            { $match: { user: req.user._id } },
+            { $match: { user: req.auth.userId } },
             {
                 $group: {
                     _id: "$category",
@@ -166,7 +166,7 @@ router.get('/stats', async (req, res) => {
 // POST /api/expenses/analyze-all - Re-categorize all uncategorized expenses
 router.post('/analyze-all', async (req, res) => {
     try {
-        const expenses = await Expense.find({ user: req.user._id }); // Find all to potential fix bad categories too if needed, or just { category: 'Uncategorized' }
+        const expenses = await Expense.find({ user: req.auth.userId }); // Find all to potential fix bad categories too if needed, or just { category: 'Uncategorized' }
         let count = 0;
 
         for (const expense of expenses) {

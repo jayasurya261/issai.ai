@@ -3,10 +3,9 @@ import { motion } from 'framer-motion';
 import { ArrowRight, BarChart2, PieChart, Zap } from 'lucide-react';
 import Navbar from './Navbar';
 import { Link } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react';
 
 const LandingPage = () => {
-    const { user } = useUser();
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }
@@ -17,15 +16,6 @@ const LandingPage = () => {
             transition: {
                 staggerChildren: 0.2
             }
-        }
-    };
-
-    const handleGetStarted = () => {
-        if (user) {
-            // Already logged in, let Link handle navigation or programmatically navigate
-            // But since we wrap button in Link conditionally, we can just handle the click for non-user
-        } else {
-            window.location.href = 'https://issai-ai.vercel.app/auth/google';
         }
     };
 
@@ -60,26 +50,30 @@ const LandingPage = () => {
                         </motion.p>
 
                         <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            {user ? (
-                                <Link to="/dashboard">
-                                    <motion.button
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="px-8 py-4 bg-blue-600 text-white rounded-full font-bold text-lg shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all flex items-center"
-                                    >
-                                        Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
-                                    </motion.button>
-                                </Link>
-                            ) : (
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleGetStarted}
-                                    className="px-8 py-4 bg-blue-600 text-white rounded-full font-bold text-lg shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all flex items-center"
-                                >
-                                    Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
-                                </motion.button>
-                            )}
+                            <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                <SignedIn>
+                                    <Link to="/dashboard">
+                                        <motion.button
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            className="px-8 py-4 bg-blue-600 text-white rounded-full font-bold text-lg shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all flex items-center"
+                                        >
+                                            Go to Dashboard <ArrowRight className="ml-2 h-5 w-5" />
+                                        </motion.button>
+                                    </Link>
+                                </SignedIn>
+                                <SignedOut>
+                                    <SignInButton mode="modal">
+                                        <motion.button
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                            className="px-8 py-4 bg-blue-600 text-white rounded-full font-bold text-lg shadow-xl shadow-blue-500/20 hover:bg-blue-700 transition-all flex items-center"
+                                        >
+                                            Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
+                                        </motion.button>
+                                    </SignInButton>
+                                </SignedOut>
+                            </motion.div>
                         </motion.div>
                     </motion.div>
 
@@ -169,20 +163,23 @@ const LandingPage = () => {
                         <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto relative z-10">
                             Start tracking your expenses today with AI-powered categorization. It's free!
                         </p>
-                        {user ? (
+                        {/* CTA Section logic replacement */}
+                        <SignedIn>
                             <Link to="/dashboard" className="relative z-10">
                                 <button className="px-10 py-4 bg-white text-blue-600 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg">
                                     Go to Dashboard
                                 </button>
                             </Link>
-                        ) : (
-                            <button
-                                onClick={handleGetStarted}
-                                className="relative z-10 px-10 py-4 bg-white text-blue-600 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg"
-                            >
-                                Start Your Journey Now
-                            </button>
-                        )}
+                        </SignedIn>
+                        <SignedOut>
+                            <SignInButton mode="modal">
+                                <button
+                                    className="relative z-10 px-10 py-4 bg-white text-blue-600 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg"
+                                >
+                                    Start Your Journey Now
+                                </button>
+                            </SignInButton>
+                        </SignedOut>
                     </div>
                 </div>
             </section>
