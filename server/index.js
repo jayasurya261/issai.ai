@@ -23,6 +23,20 @@ app.get('/', (req, res) => {
     res.send('Expense Tracker API is running');
 });
 
+app.get('/health', (req, res) => {
+    const dbState = mongoose.connection.readyState;
+    const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+    res.json({
+        status: 'ok',
+        dbState: states[dbState] || 'unknown',
+        env: {
+            port: process.env.PORT,
+            clientUrl: process.env.CLIENT_URL,
+            hasClerkKey: !!process.env.CLERK_SECRET_KEY
+        }
+    });
+});
+
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB Connected'))
     .catch(err => console.error('MongoDB Connection Error:', err));

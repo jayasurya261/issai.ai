@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { getExpenses, getStats, exportCsv, analyzeAllExpenses, deleteExpense } from '../services/api';
+import { getExpenses, getStats, exportCsv, analyzeAllExpenses, deleteExpense, setAuthToken } from '../services/api';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
+import Navbar from './Navbar';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { useUser, useAuth } from "@clerk/clerk-react";
@@ -19,6 +20,8 @@ const Dashboard = () => {
 
     const fetchData = async () => {
         try {
+            const token = await getToken();
+            setAuthToken(token); // Ensure token is set before call
             const expensesRes = await getExpenses();
             const statsRes = await getStats();
             setExpenses(expensesRes.data);
@@ -28,12 +31,12 @@ const Dashboard = () => {
         }
     };
 
-    // Fetch data when user is authenticated
+    // Fetch data when user is loaded
     useEffect(() => {
-        if (user) {
+        if (isLoaded && user) {
             fetchData();
         }
-    }, [user]);
+    }, [isLoaded, user]);
 
     // Prepare Chart Data
     const chartData = {
@@ -88,43 +91,46 @@ const Dashboard = () => {
 
     if (!isLoaded) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-800">AI Expense Tracker</h1>
-                <div className="flex gap-4">
-                    <button onClick={handleAnalyze} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-                        Re-Analyze Data
-                    </button>
-                    <button onClick={exportCsv} className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
-                        Export CSV
-                    </button>
+        <div className="min-h-screen bg-gray-50">
+            <Navbar />
+            <div className="container mx-auto px-4 py-8 pt-24">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-800">AI Expense Tracker</h1>
+                    <div className="flex gap-4">
+                        <button onClick={handleAnalyze} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                            Re-Analyze Data
+                        </button>
+                        <button onClick={exportCsv} className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                            Export CSV
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                <div className="lg:col-span-2">
-                    <ExpenseForm
-                        onExpenseAdded={() => {
-                            fetchData();
-                            setEditingExpense(null);
-                        }}
-                        editingExpense={editingExpense}
-                        onCancelEdit={() => setEditingExpense(null)}
-                    />
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <div className="lg:col-span-2">
+                        <ExpenseForm
+                            onExpenseAdded={() => {
+                                fetchData();
+                                setEditingExpense(null);
+                            }}
+                            editingExpense={editingExpense}
+                            onCancelEdit={() => setEditingExpense(null)}
+                        />
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md">
+                        <h3 className="text-xl font-semibold mb-4 text-center">Category Breakdown</h3>
+                        {stats.length > 0 ? (
+                            <div className="h-64 flex justify-center">
+                                <Doughnut data={chartData} options={{ maintainAspectRatio: false }} />
+                            </div>
+                        ) : (
+                            <p className="text-center text-gray-500 mt-10">No data available for charts.</p>
+                        )}
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold mb-4 text-center">Category Breakdown</h3>
-                    {stats.length > 0 ? (
-                        <div className="h-64 flex justify-center">
-                            <Doughnut data={chartData} options={{ maintainAspectRatio: false }} />
-                        </div>
-                    ) : (
-                        <p className="text-center text-gray-500 mt-10">No data available for charts.</p>
-                    )}
-                </div>
-            </div>
 
-            <ExpenseList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
+                <ExpenseList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
+            </div>
         </div>
     );
 };

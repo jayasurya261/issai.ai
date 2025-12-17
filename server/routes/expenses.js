@@ -19,10 +19,21 @@ router.use(clerkAuth);
 // GET /api/expenses - List all expenses
 router.get('/', async (req, res) => {
     try {
+        console.log("GET /expenses Request Auth:", JSON.stringify(req.auth, null, 2));
+
+        if (!req.auth) {
+            throw new Error("req.auth is completely missing");
+        }
+        if (!req.auth.userId) {
+            throw new Error("req.auth.userId is missing");
+        }
+
         const expenses = await Expense.find({ user: req.auth.userId }).sort({ date: -1 });
+        console.log(`Found ${expenses.length} expenses for user ${req.auth.userId}`);
         res.json(expenses);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("GET /expenses Error:", error);
+        res.status(500).json({ message: error.message, stack: error.stack });
     }
 });
 
