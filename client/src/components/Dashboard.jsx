@@ -27,6 +27,13 @@ const Dashboard = () => {
         }
     };
 
+    // Fetch data when user is authenticated
+    useEffect(() => {
+        if (user) {
+            fetchData();
+        }
+    }, [user]);
+
     // Prepare Chart Data
     const chartData = {
         labels: stats.map(s => s._id),
