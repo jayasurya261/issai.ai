@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, BarChart2, PieChart, Wallet, Zap, Shield, Globe } from 'lucide-react';
+import { ArrowRight, BarChart2, PieChart, Zap } from 'lucide-react';
 import Navbar from './Navbar';
 import { Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
@@ -80,9 +80,6 @@ const LandingPage = () => {
                                     Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
                                 </motion.button>
                             )}
-                            <button className="px-8 py-4 bg-white text-gray-700 border border-gray-200 rounded-full font-bold text-lg hover:border-gray-300 hover:bg-gray-50 transition-all">
-                                Watch Demo
-                            </button>
                         </motion.div>
                     </motion.div>
 
@@ -114,37 +111,49 @@ const LandingPage = () => {
                     <div className="grid md:grid-cols-3 gap-8">
                         <FeatureCard
                             icon={<Zap className="h-8 w-8 text-amber-500" />}
-                            title="Instant Tracking"
-                            description="Log expenses in seconds. Our AI automatically handles the categorization for you."
+                            title="AI Auto-Categorization"
+                            description="Add expenses manually or via CSV. Our AI powered by Google Gemini automatically categorizes them for you."
                             delay={0.1}
                         />
                         <FeatureCard
                             icon={<BarChart2 className="h-8 w-8 text-blue-500" />}
-                            title="Advanced Analytics"
-                            description="Visualize your spending patterns with beautiful charts and deep insights."
+                            title="Visual Analytics"
+                            description="See your spending patterns with interactive doughnut charts showing category-wise breakdown."
                             delay={0.2}
                         />
                         <FeatureCard
-                            icon={<Shield className="h-8 w-8 text-green-500" />}
-                            title="Secure & Private"
-                            description="Bank-grade encryption ensures your financial data stays private and secure."
+                            icon={<PieChart className="h-8 w-8 text-green-500" />}
+                            title="CSV Import & Export"
+                            description="Bulk import expenses from CSV files and export your data anytime for backup or analysis."
                             delay={0.3}
                         />
                     </div>
                 </div>
             </section>
 
-            {/* Stats Section */}
+            {/* How It Works Section */}
             <section className="py-24 bg-gray-900 text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 -z-10 w-96 h-96 bg-blue-600 rounded-full blur-[128px] opacity-20" />
                 <div className="absolute bottom-0 left-0 -z-10 w-96 h-96 bg-purple-600 rounded-full blur-[128px] opacity-20" />
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-4 gap-12 text-center">
-                        <Stat number="50K+" label="Active Users" />
-                        <Stat number="$2M+" label="Tracked Monthly" />
-                        <Stat number="4.9/5" label="User Rating" />
-                        <Stat number="99%" label="Security Score" />
+                    <h2 className="text-3xl font-bold text-center mb-16">How It Works</h2>
+                    <div className="grid md:grid-cols-3 gap-12 text-center">
+                        <div>
+                            <div className="text-4xl font-bold text-blue-400 mb-4">1</div>
+                            <h3 className="text-xl font-semibold mb-2">Sign in with Google</h3>
+                            <p className="text-gray-400">Quick and secure authentication with your Google account.</p>
+                        </div>
+                        <div>
+                            <div className="text-4xl font-bold text-indigo-400 mb-4">2</div>
+                            <h3 className="text-xl font-semibold mb-2">Add Your Expenses</h3>
+                            <p className="text-gray-400">Enter manually or upload a CSV file. AI categorizes automatically.</p>
+                        </div>
+                        <div>
+                            <div className="text-4xl font-bold text-purple-400 mb-4">3</div>
+                            <h3 className="text-xl font-semibold mb-2">Track & Analyze</h3>
+                            <p className="text-gray-400">View charts, manage expenses, and export data anytime.</p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -158,7 +167,7 @@ const LandingPage = () => {
 
                         <h2 className="text-4xl font-bold mb-6 relative z-10">Ready to take control?</h2>
                         <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto relative z-10">
-                            Join thousands of smart users who are managing their finances better with Issai.ai.
+                            Start tracking your expenses today with AI-powered categorization. It's free!
                         </p>
                         {user ? (
                             <Link to="/dashboard" className="relative z-10">
@@ -179,44 +188,16 @@ const LandingPage = () => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-gray-50 pt-16 pb-8 border-t border-gray-200">
+            <footer className="bg-gray-50 pt-12 pb-8 border-t border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid md:grid-cols-4 gap-12 mb-12">
-                        <div>
-                            <div className="flex items-center space-x-2 mb-4">
-                                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-                                    I
-                                </div>
-                                <span className="text-xl font-bold text-gray-900">Issai.ai</span>
+                    <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+                        <div className="flex items-center space-x-2 mb-4 md:mb-0">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                                I
                             </div>
-                            <p className="text-gray-500">Making personal finance intelligent and effortless for everyone.</p>
+                            <span className="text-xl font-bold text-gray-900">Issai.ai</span>
                         </div>
-
-                        <div>
-                            <h4 className="font-bold text-gray-900 mb-4">Product</h4>
-                            <ul className="space-y-2 text-gray-600">
-                                <li><a href="#" className="hover:text-blue-600">Features</a></li>
-                                <li><a href="#" className="hover:text-blue-600">Pricing</a></li>
-                                <li><a href="#" className="hover:text-blue-600">Integrations</a></li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <h4 className="font-bold text-gray-900 mb-4">Company</h4>
-                            <ul className="space-y-2 text-gray-600">
-                                <li><a href="#" className="hover:text-blue-600">About</a></li>
-                                <li><a href="#" className="hover:text-blue-600">Blog</a></li>
-                                <li><a href="#" className="hover:text-blue-600">Careers</a></li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <h4 className="font-bold text-gray-900 mb-4">Legal</h4>
-                            <ul className="space-y-2 text-gray-600">
-                                <li><a href="#" className="hover:text-blue-600">Privacy</a></li>
-                                <li><a href="#" className="hover:text-blue-600">Terms</a></li>
-                            </ul>
-                        </div>
+                        <p className="text-gray-500 text-center md:text-right">AI-Powered Expense Tracking with Google Gemini</p>
                     </div>
 
                     <div className="border-t border-gray-200 pt-8 text-center text-gray-500 text-sm">
@@ -241,17 +222,6 @@ const FeatureCard = ({ icon, title, description, delay }) => (
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
         <p className="text-gray-600 leading-relaxed">{description}</p>
-    </motion.div>
-);
-
-const Stat = ({ number, label }) => (
-    <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-    >
-        <h3 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 mb-2">{number}</h3>
-        <p className="text-gray-400 font-medium">{label}</p>
     </motion.div>
 );
 
