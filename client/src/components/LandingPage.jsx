@@ -25,7 +25,7 @@ const LandingPage = () => {
             // Already logged in, let Link handle navigation or programmatically navigate
             // But since we wrap button in Link conditionally, we can just handle the click for non-user
         } else {
-            window.location.href = 'https://issai-ai.vercel.app/auth/google';
+            window.location.href = 'https://issaiai.vercel.app/auth/google';
         }
     };
 
