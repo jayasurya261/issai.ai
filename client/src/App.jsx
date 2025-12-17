@@ -10,23 +10,37 @@ if (!publishableKey) {
   throw new Error("Missing Publishable Key")
 }
 
-import { useAuth } from '@clerk/clerk-react';
-import { setAuthToken } from './services/api';
+import { useAuth, useUser } from '@clerk/clerk-react';
+import { setAuthToken, syncUser } from './services/api';
 
 const AuthSync = () => {
-  const { getToken, isSignedIn } = useAuth();
+  const { getToken, isSignedIn } = useAuth(); // Note: useAuth doesn't return user, useUser does
+  const { user: clerkUser } = useUser();
 
   React.useEffect(() => {
-    const syncToken = async () => {
-      if (isSignedIn) {
+    const sync = async () => {
+      if (isSignedIn && clerkUser) {
         const token = await getToken();
         setAuthToken(token);
+
+        // Sync user to DB
+        try {
+          await syncUser({
+            clerkId: clerkUser.id,
+            email: clerkUser.primaryEmailAddress?.emailAddress,
+            firstName: clerkUser.firstName,
+            lastName: clerkUser.lastName,
+            imageUrl: clerkUser.imageUrl
+          });
+        } catch (err) {
+          console.error("Failed to sync user", err);
+        }
       } else {
         setAuthToken(null);
       }
     };
-    syncToken();
-  }, [isSignedIn, getToken]);
+    sync();
+  }, [isSignedIn, getToken, clerkUser]);
 
   return null;
 };
