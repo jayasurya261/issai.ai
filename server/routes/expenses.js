@@ -7,7 +7,9 @@ const csv = require('csv-parser');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
 
-const upload = multer({ dest: 'uploads/' });
+const streamifier = require('streamifier');
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 // GET /api/expenses - List all expenses
 router.get('/', async (req, res) => {
@@ -77,47 +79,37 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// POST /api/expenses/upload - CSV Upload
-router.post('/upload', upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).send('No file uploaded.');
+// POST /api/expenses/batch - Batch insert expenses (from frontend CSV parse)
+router.post('/batch', async (req, res) => {
+    const { expenses } = req.body; // Expects { expenses: [ { title, amount, date, description }, ... ] }
+
+    if (!expenses || !Array.isArray(expenses) || expenses.length === 0) {
+        return res.status(400).json({ message: 'No expenses provided' });
     }
 
-    const results = [];
-    fs.createReadStream(req.file.path)
-        .pipe(csv())
-        .on('data', (data) => results.push(data))
-        .on('end', async () => {
-            try {
-                const expenses = [];
-                for (const row of results) {
-                    // Mapping CSV columns - assuming Title, Amount, Date, Description headers
-                    const title = row.Title || row.title;
-                    const amount = row.Amount || row.amount;
-                    const date = row.Date || row.date || new Date(); // Default to now if missing
-                    const description = row.Description || row.description || '';
+    try {
+        const processedExpenses = [];
+        for (const item of expenses) {
+            const { title, amount, date, description } = item;
 
-                    // Basic validation
-                    if (title && amount) {
-                        const category = await categorizeExpense(title, description);
-                        expenses.push({
-                            title,
-                            amount: parseFloat(amount),
-                            date: new Date(date),
-                            description,
-                            category,
-                            isManual: false
-                        });
-                    }
-                }
-
-                await Expense.insertMany(expenses);
-                fs.unlinkSync(req.file.path); // Clean up uploaded file
-                res.status(201).json({ message: `Successfully imported ${expenses.length} expenses.` });
-            } catch (error) {
-                res.status(500).json({ message: error.message });
+            if (title && amount) {
+                const category = await categorizeExpense(title, description || '');
+                processedExpenses.push({
+                    title,
+                    amount: parseFloat(amount),
+                    date: new Date(date),
+                    description: description || '',
+                    category,
+                    isManual: false
+                });
             }
-        });
+        }
+
+        await Expense.insertMany(processedExpenses);
+        res.status(201).json({ message: `Successfully imported ${processedExpenses.length} expenses.` });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
 
 // GET /api/expenses/export/csv

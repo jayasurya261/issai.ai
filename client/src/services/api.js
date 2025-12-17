@@ -7,11 +7,8 @@ const api = axios.create({
 
 export const getExpenses = () => api.get('/expenses');
 export const addExpense = (expense) => api.post('/expenses', expense);
-export const uploadExpenses = (formData) => api.post('/expenses/upload', formData, {
-    headers: {
-        'Content-Type': 'multipart/form-data',
-    },
-});
+// export const uploadExpenses = (formData) => api.post('/expenses/upload', formData, { ... }); // Deprecated
+export const batchImportExpenses = (expenses) => api.post('/expenses/batch', { expenses });
 export const analyzeAllExpenses = () => api.post('/expenses/analyze-all');
 export const deleteExpense = (id) => api.delete(`/expenses/${id}`);
 export const updateExpense = (id, expense) => api.put(`/expenses/${id}`, expense);

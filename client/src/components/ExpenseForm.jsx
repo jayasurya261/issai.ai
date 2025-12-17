@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { addExpense, uploadExpenses, updateExpense } from '../services/api';
+import Papa from 'papaparse';
+import { addExpense, batchImportExpenses, updateExpense } from '../services/api';
 
 const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }) => {
     const [formData, setFormData] = useState({
@@ -74,19 +75,42 @@ const ExpenseForm = ({ onExpenseAdded, editingExpense, onCancelEdit }) => {
         e.preventDefault();
         if (!file) return;
         setLoading(true);
-        const data = new FormData();
-        data.append('file', file);
-        try {
-            await uploadExpenses(data);
-            setFile(null);
-            onExpenseAdded();
-            alert('CSV uploaded successfully!');
-        } catch (error) {
-            alert('Error uploading CSV');
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async (results) => {
+                const expenses = results.data.map(row => {
+                    // Normalize keys assuming some variations or exact match
+                    const title = row.Title || row.title;
+                    const amount = row.Amount || row.amount;
+                    const date = row.Date || row.date || new Date();
+                    const description = row.Description || row.description || '';
+
+                    if (title && amount) {
+                        return { title, amount, date, description };
+                    }
+                    return null;
+                }).filter(e => e !== null);
+
+                try {
+                    await batchImportExpenses(expenses);
+                    setFile(null);
+                    onExpenseAdded();
+                    alert(`Successfully imported ${expenses.length} expenses from CSV!`);
+                } catch (error) {
+                    alert('Error uploading expenses');
+                    console.error(error);
+                } finally {
+                    setLoading(false);
+                }
+            },
+            error: (error) => {
+                console.error("CSV Parse Error", error);
+                alert("Failed to parse CSV file");
+                setLoading(false);
+            }
+        });
     };
 
     return (
