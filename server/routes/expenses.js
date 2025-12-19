@@ -150,6 +150,72 @@ router.post('/batch', async (req, res) => {
     }
 });
 
+// GET /api/expenses/export/pdf
+router.get('/export/pdf', async (req, res) => {
+    try {
+        const expenses = await Expense.find({ user: req.auth.userId }).sort({ date: -1 });
+        const doc = new PDFDocument({ margin: 50 });
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=expenses.pdf');
+
+        doc.pipe(res);
+
+        // Header
+        doc.fontSize(20).text('Expense Report', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(12).text(`Generated on: ${new Date().toLocaleDateString()}`, { align: 'right' });
+        doc.moveDown();
+
+        // Table Header
+        const tableTop = 150;
+        const categoryX = 50;
+        const descriptionX = 130;
+        const amountX = 350;
+        const dateX = 450;
+
+        doc
+            .fontSize(10)
+            .text('Category', categoryX, tableTop)
+            .text('Title & Description', descriptionX, tableTop)
+            .text('Amount', amountX, tableTop)
+            .text('Date', dateX, tableTop);
+
+        doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+
+        let y = tableTop + 25;
+        let totalAmount = 0;
+
+        expenses.forEach(expense => {
+            if (y > 700) {
+                doc.addPage();
+                y = 50;
+            }
+
+            totalAmount += expense.amount;
+
+            doc.fontSize(10);
+            doc.text(expense.category, categoryX, y, { width: 75 });
+            doc.text(`${expense.title}${expense.description ? ` - ${expense.description.substring(0, 25)}` : ''}`, descriptionX, y, { width: 210 });
+            doc.text(`$${expense.amount.toFixed(2)}`, amountX, y, { width: 90 });
+            doc.text(new Date(expense.date).toLocaleDateString(), dateX, y, { width: 90 });
+
+            y += 20;
+        });
+
+        doc.moveDown();
+        doc.moveTo(50, y).lineTo(550, y).stroke();
+        y += 10;
+        doc.fontSize(12).text(`Total Spending: $${totalAmount.toFixed(2)}`, dateX - 50, y);
+
+        doc.end();
+
+    } catch (error) {
+        console.error("PDF Export Error:", error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // GET /api/expenses/export/csv
 router.get('/export/csv', async (req, res) => {
     try {

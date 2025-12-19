@@ -5,6 +5,7 @@ const cors = require('cors');
 const expenseRoutes = require('./routes/expenses');
 const userRoutes = require('./routes/users');
 const aiRoutes = require('./routes/ai');
+const budgetRoutes = require('./routes/budgets');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/budgets', budgetRoutes);
 
 app.get('/', (req, res) => {
     res.send('Expense Tracker API is running');

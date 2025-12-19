@@ -38,4 +38,19 @@ export const exportCsv = async (token) => {
     link.click();
 };
 
+export const exportPdf = async () => {
+    const response = await api.get('/expenses/export/pdf', { responseType: 'blob' });
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'expenses.pdf');
+    document.body.appendChild(link);
+    link.click();
+};
+
+// Budget API
+export const getBudgets = () => api.get('/budgets');
+export const setBudget = (category, limit) => api.post('/budgets', { category, limit });
+export const deleteBudget = (category) => api.delete(`/budgets/${category}`);
+
 export default api;

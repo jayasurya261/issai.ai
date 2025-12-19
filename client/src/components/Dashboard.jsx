@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { getExpenses, getStats, exportCsv, analyzeAllExpenses, deleteExpense, deleteExpensesBatch, setAuthToken } from '../services/api';
+import { getExpenses, getStats, exportCsv, exportPdf, analyzeAllExpenses, deleteExpense, deleteExpensesBatch, setAuthToken } from '../services/api';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import Navbar from './Navbar';
 import ChatAssistant from './ChatAssistant';
+import BudgetSection from './BudgetSection';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { useUser, useAuth } from "@clerk/clerk-react";
@@ -116,6 +117,9 @@ const Dashboard = () => {
                         <button onClick={exportCsv} className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
                             Export CSV
                         </button>
+                        <button onClick={exportPdf} className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                            Export PDF
+                        </button>
                     </div>
                 </div>
 
@@ -140,6 +144,10 @@ const Dashboard = () => {
                             <p className="text-center text-gray-500 mt-10">No data available for charts.</p>
                         )}
                     </div>
+                </div>
+
+                <div className="mb-8">
+                    <BudgetSection stats={stats} />
                 </div>
 
                 <ExpenseList
