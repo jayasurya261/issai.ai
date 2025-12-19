@@ -6,8 +6,9 @@ const clerkAuth = ClerkExpressWithAuth({
     // Optional: Add onError handler
     onError: (err, req, res) => {
         console.error('Clerk Auth Error:', err);
+        console.error('Auth Header:', req.headers.authorization);
         // Do not end response here, let next() handle it or simple return
-        res.status(401).json({ error: 'Unauthenticated', details: err.message });
+        res.status(401).json({ error: 'Unauthenticated', details: err.message, stack: err.stack });
     },
     debug: true
 });

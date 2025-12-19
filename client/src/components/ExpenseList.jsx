@@ -1,12 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-const ExpenseList = ({ expenses, onEdit, onDelete }) => {
+const ExpenseList = ({ expenses, onEdit, onDelete, onDeleteBatch }) => {
+    const [selectedIds, setSelectedIds] = useState([]);
+
+    // Clear selection when expenses change (e.g., after a delete)
+    useEffect(() => {
+        setSelectedIds([]);
+    }, [expenses]);
+
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            setSelectedIds(expenses.map(exp => exp._id));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const handleSelectOne = (id) => {
+        setSelectedIds(prev =>
+            prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
+        );
+    };
+
+    const handleDeleteSelected = () => {
+        onDeleteBatch(selectedIds);
+    };
+
     return (
         <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-            <h3 className="text-xl font-semibold mb-4">Recent Expenses</h3>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold">Recent Expenses</h3>
+                {selectedIds.length > 0 && (
+                    <button
+                        onClick={handleDeleteSelected}
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
+                    >
+                        Delete Selected ({selectedIds.length})
+                    </button>
+                )}
+            </div>
             <table className="min-w-full text-left">
                 <thead>
                     <tr className="border-b">
+                        <th className="py-2 px-4 w-10">
+                            <input
+                                type="checkbox"
+                                onChange={handleSelectAll}
+                                checked={expenses.length > 0 && selectedIds.length === expenses.length}
+                                className="w-4 h-4 text-indigo-600 rounded bg-gray-100 border-gray-300 focus:ring-indigo-500"
+                            />
+                        </th>
                         <th className="py-2 px-4">Date</th>
                         <th className="py-2 px-4">Title</th>
                         <th className="py-2 px-4">Category</th>
@@ -18,11 +61,19 @@ const ExpenseList = ({ expenses, onEdit, onDelete }) => {
                 <tbody>
                     {expenses.length === 0 ? (
                         <tr>
-                            <td colSpan="6" className="py-4 text-center text-gray-500">No expenses found.</td>
+                            <td colSpan="7" className="py-4 text-center text-gray-500">No expenses found.</td>
                         </tr>
                     ) : (
                         expenses.map((expense) => (
                             <tr key={expense._id} className="border-b hover:bg-gray-50">
+                                <td className="py-2 px-4">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.includes(expense._id)}
+                                        onChange={() => handleSelectOne(expense._id)}
+                                        className="w-4 h-4 text-indigo-600 rounded bg-gray-100 border-gray-300 focus:ring-indigo-500"
+                                    />
+                                </td>
                                 <td className="py-2 px-4">{new Date(expense.date).toLocaleDateString()}</td>
                                 <td className="py-2 px-4 font-medium">{expense.title}</td>
                                 <td className="py-2 px-4">

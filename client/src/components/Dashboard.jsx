@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getExpenses, getStats, exportCsv, analyzeAllExpenses, deleteExpense, setAuthToken } from '../services/api';
+import { getExpenses, getStats, exportCsv, analyzeAllExpenses, deleteExpense, deleteExpensesBatch, setAuthToken } from '../services/api';
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import Navbar from './Navbar';
@@ -90,6 +90,18 @@ const Dashboard = () => {
         }
     };
 
+    const handleDeleteBatch = async (ids) => {
+        if (window.confirm(`Are you sure you want to delete ${ids.length} expenses?`)) {
+            try {
+                await deleteExpensesBatch(ids);
+                fetchData(); // Refresh list
+            } catch (error) {
+                console.error("Error deleting expenses", error);
+                alert("Failed to delete expenses");
+            }
+        }
+    };
+
     if (!isLoaded) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     return (
         <div className="min-h-screen bg-gray-50">
@@ -130,7 +142,12 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <ExpenseList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
+                <ExpenseList
+                    expenses={expenses}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onDeleteBatch={handleDeleteBatch}
+                />
             </div>
             <ChatAssistant />
         </div >

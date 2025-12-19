@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getAIChatResponse } from '../services/api';
+import ReactMarkdown from 'react-markdown';
 
 const ChatAssistant = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -42,7 +43,7 @@ const ChatAssistant = () => {
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
             {/* Chat Window */}
             {isOpen && (
-                <div className="bg-white w-80 md:w-96 h-96 rounded-2xl shadow-2xl flex flex-col overflow-hidden mb-4 border border-gray-200 animate-fade-in-up">
+                <div className="bg-white w-96 md:w-[600px] h-[700px] rounded-2xl shadow-2xl flex flex-col overflow-hidden mb-4 border border-gray-200 animate-fade-in-up">
                     <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center text-white">
                         <div className="flex items-center gap-2">
                             <span className="text-xl">✨</span>
@@ -59,10 +60,25 @@ const ChatAssistant = () => {
                         {messages.map((msg, index) => (
                             <div key={index} className={`mb-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[80%] p-3 rounded-2xl ${msg.role === 'user'
-                                        ? 'bg-indigo-600 text-white rounded-tr-none'
-                                        : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none shadow-sm'
+                                    ? 'bg-indigo-600 text-white rounded-tr-none'
+                                    : 'bg-white border border-gray-200 text-gray-800 rounded-tl-none shadow-sm'
                                     }`}>
-                                    {msg.text}
+                                    {msg.role === 'assistant' ? (
+                                        <div className="markdown-content">
+                                            <ReactMarkdown
+                                                components={{
+                                                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                                                    strong: ({ children }) => <strong className="font-bold text-indigo-700">{children}</strong>,
+                                                    ul: ({ children }) => <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>,
+                                                    li: ({ children }) => <li className="ml-1">{children}</li>,
+                                                }}
+                                            >
+                                                {msg.text}
+                                            </ReactMarkdown>
+                                        </div>
+                                    ) : (
+                                        msg.text
+                                    )}
                                 </div>
                             </div>
                         ))}

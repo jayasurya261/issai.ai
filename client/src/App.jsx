@@ -20,11 +20,12 @@ const AuthSync = () => {
   React.useEffect(() => {
     const sync = async () => {
       if (isSignedIn && clerkUser) {
-        const token = await getToken();
-        setAuthToken(token);
-
-        // Sync user to DB
         try {
+          const token = await getToken();
+          console.log("AuthSync Token obtained:", token ? `${token.substring(0, 10)}...` : "null");
+          setAuthToken(token);
+
+          // Sync user to DB
           await syncUser({
             clerkId: clerkUser.id,
             email: clerkUser.primaryEmailAddress?.emailAddress,
@@ -33,9 +34,10 @@ const AuthSync = () => {
             imageUrl: clerkUser.imageUrl
           });
         } catch (err) {
-          console.error("Failed to sync user", err);
+          console.error("Failed to sync user or get token", err);
         }
       } else {
+        console.log("AuthSync: Not signed in or user not loaded");
         setAuthToken(null);
       }
     };

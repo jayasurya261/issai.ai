@@ -19,6 +19,7 @@ export const addExpense = (expense) => api.post('/expenses', expense);
 export const batchImportExpenses = (expenses) => api.post('/expenses/batch', { expenses });
 export const analyzeAllExpenses = () => api.post('/expenses/analyze-all');
 export const deleteExpense = (id) => api.delete(`/expenses/${id}`);
+export const deleteExpensesBatch = (ids) => api.post('/expenses/batch-delete', { ids });
 export const updateExpense = (id, expense) => api.put(`/expenses/${id}`, expense);
 export const getStats = () => api.get('/expenses/stats');
 

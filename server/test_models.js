@@ -17,7 +17,7 @@ async function listModels() {
 }
 
 // Actually better to just try a few known ones in the test script.
-const models = ["gemini-1.5-flash-latest", "gemini-1.5-pro", "gemini-1.0-pro"];
+const models = ["gemini-3-pro-preview"];
 
 async function testModels() {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');

@@ -77,6 +77,26 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// POST /api/expenses/batch-delete - Delete multiple expenses
+router.post('/batch-delete', async (req, res) => {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: 'No expense IDs provided' });
+    }
+
+    try {
+        const result = await Expense.deleteMany({
+            _id: { $in: ids },
+            user: req.auth.userId
+        });
+
+        res.json({ message: `Successfully deleted ${result.deletedCount} expenses.` });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // PUT /api/expenses/:id - Update an expense
 router.put('/:id', async (req, res) => {
     try {

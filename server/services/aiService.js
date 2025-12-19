@@ -3,7 +3,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 const validCategories = [
     'Food', 'Travel', 'Rent', 'Utilities', 'Entertainment', 'Health', 'Education', 'Shopping', 'Other'
@@ -103,7 +103,8 @@ async function getFinancialAdvice(query, contextData) {
         const response = await result.response;
         return response.text().trim();
     } catch (error) {
-        console.error("Error getting AI advice:", error);
+        console.error("Error getting AI advice:", error.message);
+        console.error("Full error:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
         return "I'm having trouble thinking right now. Please try again later.";
     }
 }
