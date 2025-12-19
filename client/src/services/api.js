@@ -24,6 +24,7 @@ export const getStats = () => api.get('/expenses/stats');
 
 export const syncUser = (userData) => api.post('/users/sync', userData);
 export const getUserProfile = () => api.get('/users/profile');
+export const getAIChatResponse = (message) => api.post('/ai/chat', { message });
 export const exportCsv = async (token) => {
     // For file download with auth, we might need a blob fetch or signed URL. 
     // Simplest for now is passing token in query param if backend supported it, OR usage of fetch with blob.

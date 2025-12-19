@@ -3,7 +3,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const validCategories = [
     'Food', 'Travel', 'Rent', 'Utilities', 'Entertainment', 'Health', 'Education', 'Shopping', 'Other'
@@ -77,4 +77,36 @@ async function categorizeExpense(title, description = '') {
     }
 }
 
-module.exports = { categorizeExpense };
+
+async function getFinancialAdvice(query, contextData) {
+    if (!process.env.GEMINI_API_KEY) {
+        return "I'm sorry, I can't provide advice right now because my brain (API Key) is missing.";
+    }
+
+    try {
+        const prompt = `
+      You are a wise and helpful financial advisor and expense tracking assistant.
+      
+      Here is the user's current expense context:
+      ${JSON.stringify(contextData, null, 2)}
+      
+      The user asks: "${query}"
+      
+      Provide a helpful, friendly, and concise response. 
+      If they ask for advice, analyze their spending patterns (if provided) and suggest improvements.
+      If they ask a general question, answer it.
+      Keep the tone encouraging, professional yet accessible.
+      Do not output raw JSON, talk to the user naturally.
+    `;
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        return response.text().trim();
+    } catch (error) {
+        console.error("Error getting AI advice:", error);
+        return "I'm having trouble thinking right now. Please try again later.";
+    }
+}
+
+module.exports = { categorizeExpense, getFinancialAdvice };
+

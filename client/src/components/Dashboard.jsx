@@ -3,6 +3,7 @@ import { getExpenses, getStats, exportCsv, analyzeAllExpenses, deleteExpense, se
 import ExpenseForm from './ExpenseForm';
 import ExpenseList from './ExpenseList';
 import Navbar from './Navbar';
+import ChatAssistant from './ChatAssistant';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { useUser, useAuth } from "@clerk/clerk-react";
@@ -131,7 +132,8 @@ const Dashboard = () => {
 
                 <ExpenseList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
             </div>
-        </div>
+            <ChatAssistant />
+        </div >
     );
 };
 
